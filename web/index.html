@@ -1,0 +1,466 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tibox Coach</title>
+<style>
+  :root {
+    color-scheme: light;
+    --page: #f4f4f1; --surface: #fcfcfb; --surface-2: #f0efec; --surface-3: #e9e8e3;
+    --text: #0b0b0b; --text-2: #52514e; --muted: #898781;
+    --grid: #e1e0d9; --axis: #c3c2b7; --border: rgba(11,11,11,0.10);
+    --accent: #2a78d6; --accent-text: #1c5cab; --accent-soft: #e6f0fc;
+    --c-fijo: #2a78d6; --c-herramientas: #eb6834; --c-conversacion: #1baf7a; --c-generacion: #eda100;
+    --good: #0ca30c; --good-text: #006300; --good-soft: #e5f5e5;
+    --warning: #fab219; --serious: #ec835a; --critical: #d03b3b;
+    --shadow: 0 1px 2px rgba(11,11,11,0.04), 0 4px 16px rgba(11,11,11,0.04);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --page: #0d0d0d; --surface: #1a1a19; --surface-2: #232321; --surface-3: #2c2c2a;
+      --text: #f0efec; --text-2: #c3c2b7; --muted: #898781;
+      --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10);
+      --accent: #3987e5; --accent-text: #86b6ef; --accent-soft: #15253a;
+      --c-fijo: #3987e5; --c-herramientas: #d95926; --c-conversacion: #199e70; --c-generacion: #c98500;
+      --good-text: #0ca30c; --good-soft: #142614; --shadow: none;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface: #1a1a19; --surface-2: #232321; --surface-3: #2c2c2a;
+    --text: #f0efec; --text-2: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10);
+    --accent: #3987e5; --accent-text: #86b6ef; --accent-soft: #15253a;
+    --c-fijo: #3987e5; --c-herramientas: #d95926; --c-conversacion: #199e70; --c-generacion: #c98500;
+    --good-text: #0ca30c; --good-soft: #142614; --shadow: none;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--page); color: var(--text); font: 15px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 28px 16px 64px; }
+  code { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; font-size: 0.92em; background: var(--surface-2); padding: 1px 5px; border-radius: 4px; }
+
+  /* Encabezado */
+  header { display: flex; flex-wrap: wrap; gap: 16px 24px; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .logo { width: 40px; height: 40px; border-radius: 10px; background: var(--accent); color: #fff; display: grid; place-items: center; font-weight: 800; font-size: 20px; }
+  h1 { font-size: 22px; margin: 0; letter-spacing: -0.01em; line-height: 1.2; }
+  .sub { color: var(--text-2); margin: 2px 0 0; }
+  .controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .seg { display: inline-flex; padding: 3px; gap: 2px; border-radius: 10px; background: var(--surface-3); }
+  .seg button { font: inherit; font-size: 14px; border: 0; border-radius: 8px; background: transparent; color: var(--text-2); padding: 5px 12px; cursor: pointer; }
+  .seg button[aria-pressed="true"] { background: var(--surface); color: var(--text); font-weight: 600; box-shadow: var(--shadow); }
+  .btn { font: inherit; font-size: 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); color: var(--text-2); padding: 6px 12px; cursor: pointer; }
+  .btn:hover { background: var(--surface-2); }
+
+  /* Bloques */
+  section { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 22px; margin-bottom: 16px; box-shadow: var(--shadow); }
+  h2 { font-size: 18px; margin: 0; letter-spacing: -0.01em; }
+  .section-head { margin-bottom: 14px; }
+  .section-head p { color: var(--text-2); margin: 4px 0 0; font-size: 14px; }
+
+  /* Indicadores */
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 16px; }
+  .tile { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 16px; box-shadow: var(--shadow); }
+  .tile .k { color: var(--text-2); font-size: 13px; }
+  .tile .v { font-size: 28px; font-weight: 700; margin-top: 2px; letter-spacing: -0.02em; line-height: 1.2; }
+  .tile .h { color: var(--muted); font-size: 12px; margin-top: 4px; }
+  .tile .badge { display: inline-block; font-size: 12px; font-weight: 600; color: var(--good-text); background: var(--good-soft); padding: 1px 8px; border-radius: 999px; margin-top: 6px; }
+
+  /* Mayor oportunidad */
+  .hero { display: grid; grid-template-columns: auto 1fr; gap: 20px; align-items: center; background: var(--accent-soft); border-color: transparent; }
+  .hero .big { font-size: 48px; font-weight: 800; color: var(--accent-text); line-height: 1; letter-spacing: -0.03em; text-align: center; min-width: 110px; }
+  .hero .big small { display: block; font-size: 12px; font-weight: 600; letter-spacing: 0; color: var(--text-2); margin-top: 6px; }
+  .hero .eyebrow { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent-text); }
+  .hero h2 { font-size: 20px; margin: 4px 0 6px; }
+  .hero p { margin: 0; color: var(--text-2); }
+  .hero a { color: var(--accent-text); font-weight: 600; text-decoration: none; display: inline-block; margin-top: 8px; }
+  .hero a:hover { text-decoration: underline; }
+
+  /* Recomendaciones */
+  .finding { border: 1px solid var(--border); border-left: 4px solid var(--sev); border-radius: 12px; padding: 18px 20px; margin-top: 12px; scroll-margin-top: 16px; }
+  .finding:first-of-type { margin-top: 0; }
+  .finding-head { display: flex; gap: 16px; justify-content: space-between; align-items: flex-start; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--text-2); }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--sev); flex: none; }
+  .finding h3 { margin: 4px 0 0; font-size: 17px; letter-spacing: -0.01em; }
+  .impact { text-align: right; flex: none; min-width: 130px; }
+  .impact .p { font-size: 22px; font-weight: 700; line-height: 1.1; }
+  .impact .l { font-size: 12px; color: var(--muted); }
+  .meter { height: 6px; border-radius: 3px; background: var(--surface-3); margin-top: 6px; overflow: hidden; }
+  .meter span { display: block; height: 100%; background: var(--sev); border-radius: 3px; }
+  .finding .what { margin: 10px 0 14px; color: var(--text-2); }
+  .steps-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-bottom: 6px; }
+  .steps { list-style: none; counter-reset: s; margin: 0; padding: 0; }
+  .steps li { counter-increment: s; position: relative; padding: 5px 0 5px 34px; }
+  .steps li::before { content: counter(s); position: absolute; left: 0; top: 5px; width: 22px; height: 22px; border-radius: 50%; background: var(--surface-2); color: var(--text-2); font-size: 12px; font-weight: 700; display: grid; place-items: center; }
+  details { margin-top: 12px; border-top: 1px solid var(--grid); padding-top: 10px; }
+  summary { cursor: pointer; color: var(--accent-text); font-size: 14px; font-weight: 600; }
+  .ev { list-style: none; padding: 0; margin: 8px 0 0; }
+  .ev li { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; border-bottom: 1px solid var(--grid); font-size: 13px; }
+  .ev li:last-child { border-bottom: 0; }
+  .ev .l { min-width: 0; overflow-wrap: anywhere; }
+  .ev .l small { display: block; color: var(--muted); }
+  .ev .r { white-space: nowrap; color: var(--text-2); font-variant-numeric: tabular-nums; }
+
+  /* Distribución */
+  .stack { display: flex; gap: 2px; height: 28px; border-radius: 6px; overflow: hidden; }
+  .stack span { display: block; height: 100%; min-width: 2px; }
+  .legend { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px 16px; margin: 14px 0 22px; }
+  .legend div { display: flex; gap: 8px; align-items: baseline; font-size: 14px; }
+  .legend .sw { width: 12px; height: 12px; border-radius: 3px; flex: none; transform: translateY(1px); }
+  .legend b { font-variant-numeric: tabular-nums; }
+  .legend small { color: var(--muted); }
+  .hbars { display: grid; grid-template-columns: minmax(150px, 290px) 1fr; gap: 10px 16px; align-items: center; }
+  .hbars .lbl { font-size: 14px; display: flex; gap: 8px; align-items: baseline; }
+  .hbars .lbl .sw { width: 9px; height: 9px; border-radius: 50%; flex: none; transform: translateY(-1px); }
+  .hbars .lbl small { display: block; color: var(--muted); font-size: 12px; line-height: 1.35; }
+  .bar-row { display: flex; align-items: center; gap: 12px; min-width: 0; }
+  .bar-track { flex: 1; min-width: 40px; height: 12px; }
+  .bar { height: 12px; border-radius: 0 4px 4px 0; min-width: 2px; }
+  .bar-val { font-size: 13px; color: var(--text-2); white-space: nowrap; font-variant-numeric: tabular-nums; min-width: 120px; text-align: right; }
+
+  /* Fortalezas */
+  .strengths { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px; }
+  .strengths li { background: var(--good-soft); border-radius: 10px; padding: 12px 14px 12px 40px; position: relative; font-size: 14px; }
+  .strengths li::before { content: "✓"; position: absolute; left: 14px; top: 11px; color: var(--good-text); font-weight: 800; }
+
+  /* Gráfico diario */
+  .chart { position: relative; }
+  .chart svg { display: block; width: 100%; height: 220px; overflow: visible; }
+  .tip { position: absolute; pointer-events: none; background: var(--text); color: var(--page); font-size: 12px; padding: 6px 9px; border-radius: 6px; white-space: nowrap; transform: translate(-50%, calc(-100% - 8px)); display: none; }
+
+  /* Tablas */
+  .tabs { display: flex; gap: 4px; flex-wrap: wrap; border-bottom: 1px solid var(--grid); }
+  .tabs button { font: inherit; font-size: 14px; border: 0; border-bottom: 2px solid transparent; margin-bottom: -1px; background: none; color: var(--text-2); padding: 8px 12px; cursor: pointer; }
+  .tabs button[aria-selected="true"] { color: var(--text); font-weight: 600; border-bottom-color: var(--accent); }
+  .table-wrap { overflow-x: auto; margin-top: 4px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--grid); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; white-space: nowrap; font-size: 12px; }
+  tbody tr:hover { background: var(--surface-2); }
+  td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+  footer { color: var(--muted); font-size: 13px; margin-top: 28px; padding: 0 4px; }
+  footer p { margin: 6px 0; }
+  .loading { padding: 100px 0; text-align: center; color: var(--text-2); }
+
+  @media (max-width: 680px) {
+    .hero { grid-template-columns: 1fr; gap: 10px; }
+    .hero .big { text-align: left; }
+    .finding-head { flex-direction: column; gap: 8px; }
+    .impact { text-align: left; min-width: 0; width: 100%; }
+    .hbars { grid-template-columns: 1fr; gap: 4px; }
+    .hbars .bar-row { margin-bottom: 10px; }
+    .bar-val { min-width: 96px; }
+    section { padding: 18px 16px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="logo" aria-hidden="true">T</div>
+      <div>
+        <h1>Tibox Coach</h1>
+        <p class="sub">Cómo usas Claude Code y dónde puedes ahorrar</p>
+      </div>
+    </div>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="Período" id="period">
+        <button data-days="7">7 días</button>
+        <button data-days="30">30 días</button>
+        <button data-days="90">90 días</button>
+        <button data-days="0">Todo</button>
+      </div>
+      <button class="btn" id="refresh" title="Volver a leer tus sesiones">↻ Actualizar</button>
+    </div>
+  </header>
+  <main id="app"><div class="loading">Analizando tus sesiones…</div></main>
+  <footer>
+    <p><b>Privacidad.</b> Este reporte se arma en tu equipo con los archivos de <code id="dir"></code>. No se envía nada a internet.</p>
+    <p><b>Cómo se calcula.</b> Los tokens salen de los registros de Claude Code. El costo es el equivalente a precios de API que calcula el mismo Claude Code: con un plan de suscripción no es lo que pagas, pero indica qué tan rápido consumes tus límites. La distribución por tipo de contenido es una estimación: cada cosa que entra al contexto se cobra al guardarse en caché y otra vez, a un décimo del precio, en cada llamada siguiente de la sesión.</p>
+  </footer>
+</div>
+<script>
+const DEFAULT_DAYS = Number('__DEFAULT_DAYS__') || 30;
+
+const GROUPS = {
+  fijo: { name: 'Contexto base', help: 'Lo que viaja en cada llamada', color: 'var(--c-fijo)' },
+  herramientas: { name: 'Archivos y herramientas', help: 'Lo que traen Read, comandos, búsquedas y MCP', color: 'var(--c-herramientas)' },
+  conversacion: { name: 'Conversación', help: 'Tus mensajes y lo que Claude escribe', color: 'var(--c-conversacion)' },
+  generacion: { name: 'Generación', help: 'Tokens que produce el modelo', color: 'var(--c-generacion)' },
+};
+const GROUP_ORDER = ['fijo', 'herramientas', 'conversacion', 'generacion'];
+
+const CAT = {
+  'Contexto base': ['Contexto base', 'Instrucciones del sistema, herramientas, MCP y skills'],
+  'Generación de Claude': ['Generación de Claude', 'Respuestas, código y razonamiento que escribe el modelo'],
+  'Herramienta: Read': ['Archivos leídos', 'Contenido de los archivos que Claude abrió'],
+  'Herramienta: Bash': ['Salida de comandos (Bash)', 'Lo que devolvieron los comandos de terminal'],
+  'Herramienta: PowerShell': ['Salida de comandos (PowerShell)', 'Lo que devolvieron los comandos de terminal'],
+  'Herramienta: Grep': ['Búsquedas de texto', 'Coincidencias encontradas con Grep'],
+  'Herramienta: Glob': ['Listados de archivos', 'Rutas encontradas con Glob'],
+  'Herramienta: WebSearch': ['Búsquedas web', 'Resultados de búsquedas en internet'],
+  'Herramienta: WebFetch': ['Páginas web leídas', 'Contenido de páginas consultadas'],
+  'Código escrito por Claude (Write/Edit)': ['Código escrito por Claude', 'Lo que crea o edita también queda en el contexto'],
+  'Respuestas de Claude (texto)': ['Explicaciones de Claude', 'Sus respuestas en texto siguen en el historial'],
+  'Tus mensajes': ['Tus mensajes', 'Lo que escribes o pegas en el chat'],
+  'Subagentes (trabajo interno)': ['Subagentes', 'Lo que consumen por su cuenta'],
+  'Subagentes (respuestas)': ['Respuestas de subagentes', 'Lo que devuelven a tu sesión'],
+  'Comandos y su salida': ['Comandos de Claude Code', '/context, /usage y similares'],
+  'CLAUDE.md e instrucciones': ['CLAUDE.md', 'Instrucciones del proyecto'],
+  'Instrucciones inyectadas (skills, hooks)': ['Skills y hooks', 'Instrucciones cargadas durante la sesión'],
+  'Avisos de archivos editados': ['Avisos de cambios', 'Archivos que cambiaron fuera de Claude'],
+  'Archivos adjuntos (@archivo)': ['Archivos adjuntos', 'Los que mencionaste con @'],
+  'Resúmenes de compactación': ['Resúmenes de /compact', 'Lo que queda tras compactar'],
+};
+const catLabel = (name) => CAT[name] ? CAT[name][0] : name.replace(/^Herramienta: /, '');
+const catHelp = (name) => CAT[name] ? CAT[name][1] : name.startsWith('MCP: ') ? 'Resultados de este servidor MCP' : '';
+
+const SEV = {
+  alta: { label: 'Prioridad alta', color: 'var(--critical)' },
+  media: { label: 'Prioridad media', color: 'var(--serious)' },
+  baja: { label: 'Prioridad baja', color: 'var(--warning)' },
+};
+
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const nf0 = new Intl.NumberFormat('es-CL', { maximumFractionDigits: 0 });
+const nf1 = new Intl.NumberFormat('es-CL', { maximumFractionDigits: 1 });
+const usdFmt = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'USD', currencyDisplay: 'code', minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const usdFmt0 = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'USD', currencyDisplay: 'code', maximumFractionDigits: 0 });
+function tok(n) {
+  n = Math.round(n || 0);
+  if (n < 1000) return nf0.format(n);
+  if (n < 100000) return nf0.format(Math.round(n / 100) * 100);
+  if (n < 1e6) return nf0.format(Math.round(n / 1000)) + ' mil';
+  if (n < 2e6) return nf1.format(n / 1e6) + ' millón';
+  if (n < 1e9) return nf1.format(n / 1e6) + ' millones';
+  return nf1.format(n / 1e9) + ' mil millones';
+}
+// Versión corta para ejes y tablas
+function tokShort(n) {
+  n = Math.round(n || 0);
+  if (n < 1000) return nf0.format(n);
+  if (n < 1e6) return nf0.format(Math.round(n / 1000)) + ' mil';
+  return nf1.format(n / 1e6) + ' M';
+}
+const money = (n) => n == null ? '—' : (n >= 100 ? usdFmt0 : usdFmt).format(n).replace('USD', 'US$').replace(/\s/g, '');
+const pct = (n) => n == null ? '' : n < 1 ? '<1%' : nf0.format(Math.round(n)) + '%';
+const fmtDate = (s) => s ? new Date(s).toLocaleDateString('es-CL', { day: 'numeric', month: 'short' }) : '';
+
+let days = DEFAULT_DAYS;
+try { const d = localStorage.getItem('tc-days'); if (d !== null) days = Number(d); } catch {}
+
+async function load(refresh) {
+  $('#app').innerHTML = '<div class="loading">Analizando tus sesiones…</div>';
+  document.querySelectorAll('#period button').forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.days) === days)));
+  try {
+    const r = await fetch(`/api/report?days=${days}${refresh ? '&refresh=1' : ''}`);
+    if (!r.ok) throw new Error(await r.text());
+    render(await r.json());
+  } catch (e) {
+    $('#app').innerHTML = `<div class="loading">No pude generar el reporte: ${esc(e.message)}</div>`;
+  }
+}
+
+let lastReport = null;
+function render(R) {
+  lastReport = R;
+  $('#dir').textContent = R.claudeDir + '/projects';
+  const T = R.totals;
+  const periodo = R.days ? `los últimos ${R.days} días` : 'todo tu historial';
+  if (!T.sessions) {
+    $('#app').innerHTML = `<section><h2>No hay sesiones en ${periodo}</h2><p class="sub">Prueba con un período más largo.</p></section>`;
+    return;
+  }
+  let html = '';
+
+  // Indicadores
+  const cacheOk = T.cacheHitRate >= 0.85;
+  html += `<div class="tiles">
+    ${T.hasCost ? tile('Costo equivalente API', money(T.cost), `${money(T.costPerPrompt)} por cada mensaje tuyo`) : ''}
+    ${tile('Tokens procesados', tok(T.tokens), `${tok(T.output)} escritos por Claude`)}
+    ${tile('Sesiones', nf0.format(T.sessions), `${nf0.format(T.prompts)} mensajes tuyos · ${nf0.format(T.calls)} llamadas`)}
+    ${tile('Contexto por llamada', tok(T.avgContext), 'tokens en promedio')}
+    ${tile('Lectura desde caché', pct(T.cacheHitRate * 100), 'del contexto', cacheOk ? 'Muy bien' : '')}
+  </div>`;
+
+  // Mayor oportunidad
+  const top = R.findings.find((f) => f.pct != null);
+  if (top) {
+    html += `<section class="hero">
+      <div class="big">${pct(top.pct)}<small>de tu consumo</small></div>
+      <div>
+        <div class="eyebrow">Tu mayor oportunidad</div>
+        <h2>${esc(top.title)}</h2>
+        <p>${esc(top.what)}</p>
+        <a href="#f-${esc(top.id)}">Ver qué hacer ↓</a>
+      </div>
+    </section>`;
+  }
+
+  // Recomendaciones
+  html += `<section>
+    <div class="section-head"><h2>Recomendaciones</h2>
+    <p>Ordenadas por prioridad. El impacto es lo que costó cada patrón en ${periodo}. No todo se puede evitar, pero muestra dónde conviene mejorar primero.</p></div>
+    ${R.findings.length ? R.findings.map(findingHtml).join('') : '<p>No encontré patrones de desperdicio relevantes en este período.</p>'}
+  </section>`;
+
+  // Distribución
+  const groups = {};
+  for (const c of R.categories) {
+    const g = groups[c.group] || (groups[c.group] = { pct: 0, usd: 0 });
+    g.pct += c.pct; g.usd += c.usd || 0;
+  }
+  const cats = R.categories.slice(0, 12);
+  const maxPct = Math.max(...cats.map((c) => c.pct), 1);
+  html += `<section>
+    <div class="section-head"><h2>¿En qué se va tu consumo?</h2>
+    <p>Qué parte del costo se lleva cada tipo de contenido, contando cuántas veces se reenvió dentro de su sesión.</p></div>
+    <div class="stack" role="img" aria-label="Distribución del consumo por familia">${GROUP_ORDER.filter((k) => groups[k]).map((k) =>
+      `<span style="width:${groups[k].pct}%;background:${GROUPS[k].color}" title="${esc(GROUPS[k].name)}: ${pct(groups[k].pct)}"></span>`).join('')}</div>
+    <div class="legend">${GROUP_ORDER.filter((k) => groups[k]).map((k) => `<div><span class="sw" style="background:${GROUPS[k].color}"></span>
+      <span>${esc(GROUPS[k].name)} <b>${pct(groups[k].pct)}</b>${T.hasCost ? ` <small>${money(groups[k].usd)}</small>` : ''}<br><small>${esc(GROUPS[k].help)}</small></span></div>`).join('')}</div>
+    <div class="hbars">${cats.map((c) => `
+      <div class="lbl"><span class="sw" style="background:${GROUPS[c.group].color}"></span><span>${esc(catLabel(c.name))}${catHelp(c.name) ? `<small>${esc(catHelp(c.name))}</small>` : ''}</span></div>
+      <div class="bar-row" title="${esc(catLabel(c.name))}: ${pct(c.pct)}${c.usd != null ? ' · ' + money(c.usd) : ''}">
+        <div class="bar-track"><div class="bar" style="width:${(c.pct / maxPct) * 100}%;background:${GROUPS[c.group].color}"></div></div>
+        <div class="bar-val">${pct(c.pct)}${c.usd != null ? ' · ' + money(c.usd) : ''}</div>
+      </div>`).join('')}
+    </div>
+  </section>`;
+
+  if (R.strengths.length) {
+    html += `<section><div class="section-head"><h2>Lo que haces bien</h2></div>
+      <ul class="strengths">${R.strengths.map((s) => `<li>${esc(s)}</li>`).join('')}</ul></section>`;
+  }
+
+  if (R.byDay.length > 1) {
+    html += `<section><div class="section-head"><h2>Consumo por día</h2><p>${T.hasCost ? 'Costo equivalente API' : 'Tokens procesados'}. Pasa el cursor sobre una barra para ver el detalle.</p></div>
+      <div class="chart" id="daily"><svg role="img" aria-label="Consumo por día"></svg><div class="tip"></div></div></section>`;
+  }
+
+  html += `<section><div class="section-head"><h2>Detalle</h2></div>
+    <div class="tabs" role="tablist">
+      <button role="tab" data-tab="sessions" aria-selected="true">Sesiones</button>
+      <button role="tab" data-tab="projects" aria-selected="false">Proyectos</button>
+      <button role="tab" data-tab="tools" aria-selected="false">Herramientas</button>
+      <button role="tab" data-tab="models" aria-selected="false">Modelos</button>
+    </div>
+    <div class="table-wrap" id="table"></div></section>`;
+
+  $('#app').innerHTML = html;
+  if (R.byDay.length > 1) drawDaily(R.byDay, T.hasCost);
+
+  const cost = (v) => n(T.hasCost ? money(v) : '');
+  const tables = {
+    sessions: () => tableHtml(['Sesión', 'Proyecto', 'Fecha', 'Mensajes', 'Llamadas', 'Contexto máx.', 'Caché', 'Lo que más pesó', T.hasCost ? 'Costo' : 'Tokens'],
+      R.sessions.slice(0, 30).map((s) => [esc(s.name), esc(s.project), n(fmtDate(s.end)), n(s.prompts), n(s.calls), n(tokShort(s.maxContext)), n(pct(s.cacheHit * 100)), esc(catLabel(s.topCategory || '')), T.hasCost ? cost(s.usd) : n(tokShort(s.tokens))])),
+    projects: () => tableHtml(['Proyecto', 'Sesiones', 'Llamadas', 'Contexto base', 'Tokens', '% del consumo', T.hasCost ? 'Costo' : ''],
+      R.byProject.map((p) => [esc(p.project), n(p.sessions), n(p.calls), n(tokShort(p.baseline)), n(tokShort(p.tokens)), n(pct(p.pct)), cost(p.usd)])),
+    tools: () => tableHtml(['Herramienta', 'Usos', 'Tokens devueltos', 'Resultado más grande', 'Errores', '% del consumo', T.hasCost ? 'Costo asociado' : ''],
+      R.tools.map((t) => [esc(t.display), n(t.calls), n(tokShort(t.tokens)), n(tokShort(t.max)), n(t.errors), n(pct(t.pct)), cost(t.usd)])),
+    models: () => tableHtml(['Modelo', 'Llamadas', 'Tokens', '% del consumo'],
+      R.byModel.map((m) => [esc(m.model), n(m.calls), n(tokShort(m.tokens)), n(pct(m.pct))])),
+  };
+  const showTab = (k) => {
+    document.querySelectorAll('.tabs button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === k)));
+    $('#table').innerHTML = tables[k]();
+  };
+  document.querySelectorAll('.tabs button').forEach((b) => b.addEventListener('click', () => showTab(b.dataset.tab)));
+  showTab('sessions');
+}
+
+const n = (v) => ({ num: true, v: typeof v === 'number' ? nf0.format(v) : v });
+function tableHtml(head, rows) {
+  const isNum = rows.length ? rows[0].map((c) => c && c.num) : [];
+  return `<table><thead><tr>${head.map((h, i) => `<th class="${isNum[i] ? 'n' : ''}">${esc(h)}</th>`).join('')}</tr></thead>
+    <tbody>${rows.map((r) => `<tr>${r.map((c) => c && c.num ? `<td class="n">${esc(c.v)}</td>` : `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+}
+
+function tile(k, v, h, badge) {
+  return `<div class="tile"><div class="k">${esc(k)}</div><div class="v">${esc(v)}</div>${h ? `<div class="h">${esc(h)}</div>` : ''}${badge ? `<span class="badge">✓ ${esc(badge)}</span>` : ''}</div>`;
+}
+
+function findingHtml(f) {
+  const s = SEV[f.severity] || SEV.baja;
+  return `<article class="finding" id="f-${esc(f.id)}" style="--sev:${s.color}">
+    <div class="finding-head">
+      <div>
+        <span class="chip"><span class="dot" aria-hidden="true"></span>${s.label}</span>
+        <h3>${esc(f.title)}</h3>
+      </div>
+      ${f.pct != null ? `<div class="impact">
+        <div class="p">${pct(f.pct)}</div>
+        <div class="l">de tu consumo${f.impactUsd != null ? ` · ${money(f.impactUsd)}` : ''}</div>
+        <div class="meter"><span style="width:${Math.min(100, Math.max(2, f.pct * 2.5))}%"></span></div>
+      </div>` : ''}
+    </div>
+    <p class="what">${esc(f.what)}</p>
+    <div class="steps-title">Qué hacer</div>
+    <ol class="steps">${f.actions.map((a) => `<li>${esc(a)}</li>`).join('')}</ol>
+    ${f.evidence && f.evidence.length ? `<details><summary>Ver ejemplos de tus sesiones (${f.evidence.length})</summary>
+      <ul class="ev">${f.evidence.map((e) => `<li><span class="l">${esc(e.label)}${e.detail ? `<small>${esc(e.detail)}</small>` : ''}</span><span class="r">${esc(e.value || '')}</span></li>`).join('')}</ul></details>` : ''}
+  </article>`;
+}
+
+function drawDaily(data, hasCost) {
+  const box = $('#daily'), svg = box.querySelector('svg'), tip = box.querySelector('.tip');
+  const W = box.clientWidth, H = 220, m = { t: 12, r: 4, b: 26, l: 58 };
+  const iw = W - m.l - m.r, ih = H - m.t - m.b;
+  const val = (d) => hasCost ? d.usd : d.tokens;
+  const max = Math.max(...data.map(val)) || 1;
+  const p10 = Math.pow(10, Math.floor(Math.log10(max)));
+  const stepV = [1, 2, 2.5, 5, 10].find((x) => x * p10 * 4 >= max) * p10;
+  const ymax = Math.ceil(max / stepV) * stepV;
+  const step = iw / data.length, bw = Math.max(2, Math.min(26, step - 2));
+  const y = (v) => m.t + ih - (v / ymax) * ih;
+  const axisFmt = (v) => hasCost ? money(v) : tokShort(v);
+  let g = '';
+  for (let v = 0; v <= ymax + 1e-9; v += stepV) {
+    g += `<line x1="${m.l}" x2="${W - m.r}" y1="${y(v)}" y2="${y(v)}" stroke="${v === 0 ? 'var(--axis)' : 'var(--grid)'}" stroke-width="1"/>`;
+    g += `<text x="${m.l - 8}" y="${y(v) + 4}" text-anchor="end" font-size="11" fill="var(--muted)">${axisFmt(v)}</text>`;
+  }
+  const every = Math.ceil(data.length / Math.max(1, Math.floor(iw / 64)));
+  data.forEach((d, i) => {
+    const x = m.l + i * step + (step - bw) / 2, h = Math.max(0, y(0) - y(val(d)));
+    const r = Math.min(4, bw / 2, h);
+    if (h > 0) g += `<path class="b" data-i="${i}" d="M${x},${y(0)} V${y(0) - h + r} Q${x},${y(0) - h} ${x + r},${y(0) - h} H${x + bw - r} Q${x + bw},${y(0) - h} ${x + bw},${y(0) - h + r} V${y(0)} Z" fill="var(--accent)"/>`;
+    g += `<rect class="hit" data-i="${i}" x="${m.l + i * step}" y="${m.t}" width="${step}" height="${ih}" fill="transparent"/>`;
+    if (i % every === 0) g += `<text x="${x + bw / 2}" y="${H - 6}" text-anchor="middle" font-size="11" fill="var(--muted)">${fmtDate(d.day + 'T12:00:00')}</text>`;
+  });
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.innerHTML = g;
+  const bars = svg.querySelectorAll('.b');
+  svg.querySelectorAll('.hit').forEach((el) => {
+    el.addEventListener('mouseenter', () => {
+      const i = +el.dataset.i, d = data[i];
+      bars.forEach((b) => b.setAttribute('opacity', +b.dataset.i === i ? '1' : '0.45'));
+      tip.innerHTML = `<b>${fmtDate(d.day + 'T12:00:00')}</b> · ${hasCost ? money(d.usd) + ' · ' : ''}${tok(d.tokens)} tokens`;
+      tip.style.left = Math.min(W - 80, Math.max(80, +el.getAttribute('x') + step / 2)) + 'px';
+      tip.style.top = y(val(d)) + 'px';
+      tip.style.display = 'block';
+    });
+    el.addEventListener('mouseleave', () => { tip.style.display = 'none'; bars.forEach((b) => b.setAttribute('opacity', '1')); });
+  });
+}
+
+document.querySelectorAll('#period button').forEach((b) => b.addEventListener('click', () => {
+  days = Number(b.dataset.days);
+  try { localStorage.setItem('tc-days', String(days)); } catch {}
+  load();
+}));
+$('#refresh').addEventListener('click', () => load(true));
+let resizeT;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeT);
+  resizeT = setTimeout(() => { if (lastReport && lastReport.byDay.length > 1) drawDaily(lastReport.byDay, lastReport.totals.hasCost); }, 200);
+});
+load();
+</script>
+</body>
+</html>

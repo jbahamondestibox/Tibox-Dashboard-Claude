@@ -1,0 +1,28 @@
+{
+  "name": "tibox-coach",
+  "version": "0.1.0",
+  "description": "Coach personal de Claude Code: analiza tus sesiones locales y te dice dónde se van tus tokens y cómo reducirlos.",
+  "type": "module",
+  "bin": {
+    "tibox-coach": "bin/cli.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "web"
+  ],
+  "scripts": {
+    "start": "node bin/cli.js",
+    "json": "node bin/cli.js --json"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "claude-code",
+    "tokens",
+    "coach",
+    "usage"
+  ],
+  "license": "MIT"
+}

@@ -1,0 +1,12 @@
+{
+  "name": "tibox",
+  "owner": { "name": "Tibox" },
+  "description": "Plugins internos de Tibox para Claude Code.",
+  "plugins": [
+    {
+      "name": "tibox-coach",
+      "source": "./",
+      "description": "Informe personal en PDF de tu uso de Claude Code, con recomendaciones para gastar menos."
+    }
+  ]
+}

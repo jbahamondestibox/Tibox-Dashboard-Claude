@@ -1,0 +1,3 @@
+# Los informes contienen datos personales de uso: no se suben al repositorio
+*.pdf
+node_modules/

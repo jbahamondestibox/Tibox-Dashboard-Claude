@@ -1,0 +1,8 @@
+{
+  "name": "tibox-coach",
+  "version": "0.2.0",
+  "description": "Coach personal de Claude Code: genera un informe en PDF con tu consumo de tokens, tu forma de trabajar y recomendaciones para gastar menos. Todo se calcula en tu equipo.",
+  "author": { "name": "Tibox" },
+  "license": "MIT",
+  "keywords": ["claude-code", "tokens", "coach", "informe"]
+}
